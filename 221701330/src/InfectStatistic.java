@@ -53,8 +53,10 @@ class InfectStatistic {
         return wrong;
     }
 
-    public static void log(String Path)
+    public static void Log(String Path)
     {
+        String pattern = ".*//.*";
+        boolean isMatch;
         try
         {
             File file = new File(Path);
@@ -65,55 +67,59 @@ class InfectStatistic {
             else{
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String str = null;
-                while ((str = br.readLine()) != null) System.out.println("读取的内容为：" + str);
+                while ((str = br.readLine()) != null) {
+                    if(Pattern.matches(pattern,str)) continue;
+                    System.out.println("读取的内容为：" + str);
+                }
             }
         } catch (IOException  e) {
             e.printStackTrace();
         }
     }
+    public static void getAllFileName(String path,ArrayList<String> listFileName){
+        File file = new File(path);
+        File [] files = file.listFiles();
+        String [] names = file.list();
+        if(names != null){
+            String [] completNames = new String[names.length];
+            for(int i=0;i<names.length;i++){
+                completNames[i]=path+names[i];
+            }
+            listFileName.addAll(Arrays.asList(completNames));
+        }
+    }
     public static void main(String[] args)
     {
-        String pattern1 = "list";
-        String pattern2 = "-log";
-        String pattern3 = "-out";
         String pattern4 = "-date";
         String pattern5 = "-type";
-        String Path = null;
-        int i = 0;
-        boolean isMatch1 = false,isMatch2 = false,isMatch3 = false,isMatch4 = false,isMatch5 = false;
-        for(i = 0;i<args.length;i++) {
-            isMatch1 = Pattern.matches(pattern1,args[i]);
-            if(isMatch1) break;
-        }
-        for(i = 0;i<args.length;i++) {
-            isMatch2 = Pattern.matches(pattern2,args[i]);
-            if(isMatch2) {
-                Path = args[i+1];
-                break;
+        String log = null,date = null,out = null;
+        int listjudge = 0;
+        for(int j = 0;j<args.length;j++) {
+            if(args[j].equals("list")) listjudge++;
+            else if(args[j].equals("-log"))
+            {
+                log = args[j+1];
+                listjudge++;
             }
-        }
-        for(i = 0;i<args.length;i++) {
-            isMatch3 = Pattern.matches(pattern3,args[i]);
-            if(isMatch3) break;
-        }
-        for(i = 0;i<args.length;i++) {
-            isMatch4 = Pattern.matches(pattern4,args[i]);
-            if(isMatch4) {
-                Path+=args[i+1];
-                System.out.println(Path);
-                break;
+            else if(args[j].equals("-out"))
+            {
+                out = args[j+1];
+                listjudge++;
             }
+            else if(args[j].equals("-date")) date = args[j+1];
         }
-        if(isMatch2) log(Path+".log.txt");
-        for(i = 0;i<args.length;i++) {
-            isMatch5 = Pattern.matches(pattern5,args[i]);
-            if(isMatch5) break;
-        }
-        boolean listjudge = isMatch1&&isMatch2&&isMatch3;;
-        if(!listjudge)
+        if(listjudge!=3)
         {
             System.out.println("命令错误");
             //System.exit(0);
+        }
+        ArrayList<String> listFileName = new ArrayList<String>();
+        getAllFileName(log,listFileName);
+        for(String name:listFileName){
+            if(name.contains(".txt")||name.contains(".properties")){
+                Log(name);
+                if(name.equals(log+date+".log.txt")) break;
+            }
         }
         List<Province> proList = new ArrayList<>();
         Province pro1 = new Province("北京",3,4,5,6);
