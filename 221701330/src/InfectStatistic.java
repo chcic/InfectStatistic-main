@@ -118,7 +118,8 @@ class InfectStatistic {
         for(String name:listFileName){
             if(name.contains(".txt")||name.contains(".properties")){
                 Log(name);
-                if(name.equals(log+date+".log.txt")) break;
+                if(date==null) continue;
+                else if(name.equals(log+date+".log.txt")) break;
             }
         }
         List<Province> proList = new ArrayList<>();
