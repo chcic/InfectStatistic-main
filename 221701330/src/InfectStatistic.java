@@ -129,90 +129,126 @@ class InfectStatistic {
             File file = new File(Path);
             if(!file .exists())
             {
-                System.out.println("文件不存在");
+                System.out.println("路径错误");
                 System.exit(0);
             }
-            else
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String str = null;
+            while ((str = br.readLine()) != null)
             {
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String str = null;
-                while ((str = br.readLine()) != null) {
-                    Matcher num = number.matcher(str); // 现在创建 matcher 对象
-                    String arrays[] = str.split(" ");
-                    if(Pattern.matches(pattern,str)) continue; // 跳过注释内容
-                    addlist(arrays[0],proList);
-                    for (Province province1 : proList) {
-                        if (arrays[0].equals(province1.getprovince())&&num.find())
+                Matcher num = number.matcher(str); // 现在创建 matcher 对象
+                String arrays[] = str.split(" ");
+                if(Pattern.matches(pattern,str)) continue; // 跳过注释内容
+                addlist(arrays[0],proList);
+                for (Province province1 : proList) {
+                    if (arrays[0].equals(province1.getprovince())&&num.find())
+                    {
+                        people = Integer.valueOf(num.group(0));
+                        if(Pattern.matches(pattern1,str)) // 新增
                         {
-                            people = Integer.valueOf(num.group(0));
-                            if(Pattern.matches(pattern1,str)) // 新增
+                            if(Pattern.matches(pattern0_1,str)) // 新增感染患者
                             {
-                                if(Pattern.matches(pattern0_1,str)) // 新增感染患者
-                                {
-                                    province1.setip(province1.getip() + people);
-                                    allpro.setip(allpro.getip() + people);
-                                }
-                                else if(Pattern.matches(pattern0_2,str)) //新增疑似患者
-                                {
-                                    province1.setsp(province1.getsp() + people);
-                                    allpro.setsp(allpro.getsp() + people);
-                                }
-
+                                province1.setip(province1.getip() + people);
+                                allpro.setip(allpro.getip() + people);
                             }
-                            else if(Pattern.matches(pattern2,str)) //从省一流入省二
+                            else if(Pattern.matches(pattern0_2,str)) //新增疑似患者
                             {
-                                addlist(arrays[3],proList); //判断省二有没有在列表里边
-                                for (Province province2 : proList) {
-                                    if (arrays[3].equals(province2.getprovince()))
+                                province1.setsp(province1.getsp() + people);
+                                allpro.setsp(allpro.getsp() + people);
+                            }
+
+                        }
+                        else if(Pattern.matches(pattern2,str)) //从省一流入省二
+                        {
+                            addlist(arrays[3],proList); //判断省二有没有在列表里边
+                            for (Province province2 : proList) {
+                                if (arrays[3].equals(province2.getprovince()))
+                                {
+                                    if(Pattern.matches(pattern0_1,str))
                                     {
-                                        if(Pattern.matches(pattern0_1,str))
-                                        {
-                                            province1.setip(province1.getip() - people);
-                                            province2.setip(province2.getip() + people);
-                                        }
-                                        else if(Pattern.matches(pattern0_2,str))
-                                        {
-                                            province1.setsp(province1.getsp() - people);
-                                            province2.setsp(province2.getsp() + people);
-                                        }
+                                        province1.setip(province1.getip() - people);
+                                        province2.setip(province2.getip() + people);
+                                    }
+                                    else if(Pattern.matches(pattern0_2,str))
+                                    {
+                                        province1.setsp(province1.getsp() - people);
+                                        province2.setsp(province2.getsp() + people);
                                     }
                                 }
                             }
-                            else if(Pattern.matches(pattern3,str)) //死亡 dead+n,ip-n
-                            {
-                                province1.setdead(province1.getdead() + people);
-                                province1.setip(province1.getip() - people);
-                                allpro.setdead(allpro.getdead() + people);
-                                allpro.setip(allpro.getip() - people);
-                            }
-                            else if(Pattern.matches(pattern4,str)) //治愈 cure+n,ip-n
-                            {
-                                province1.setcure(province1.getcure() + people);
-                                province1.setip(province1.getip() - people);
-                                allpro.setcure(allpro.getcure() + people);
-                                allpro.setip(allpro.getip() - people);
-                            }
-                            else if(Pattern.matches(pattern5,str)) //确诊感染 sp-n,ip+n
-                            {
-                                province1.setip(province1.getip() + people);
-                                province1.setsp(province1.getsp() - people);
-                                allpro.setip(allpro.getip() + people);
-                                allpro.setsp(allpro.getsp() - people);
-                            }
-                            else if(Pattern.matches(pattern6,str)) //排除 sp-n
-                            {
-                                province1.setsp(province1.getsp() - people);
-                                allpro.setsp(allpro.getsp() - people);
-                            }
+                        }
+                        else if(Pattern.matches(pattern3,str)) //死亡 dead+n,ip-n
+                        {
+                            province1.setdead(province1.getdead() + people);
+                            province1.setip(province1.getip() - people);
+                            allpro.setdead(allpro.getdead() + people);
+                            allpro.setip(allpro.getip() - people);
+                        }
+                        else if(Pattern.matches(pattern4,str)) //治愈 cure+n,ip-n
+                        {
+                            province1.setcure(province1.getcure() + people);
+                            province1.setip(province1.getip() - people);
+                            allpro.setcure(allpro.getcure() + people);
+                            allpro.setip(allpro.getip() - people);
+                        }
+                        else if(Pattern.matches(pattern5,str)) //确诊感染 sp-n,ip+n
+                        {
+                            province1.setip(province1.getip() + people);
+                            province1.setsp(province1.getsp() - people);
+                            allpro.setip(allpro.getip() + people);
+                            allpro.setsp(allpro.getsp() - people);
+                        }
+                        else if(Pattern.matches(pattern6,str)) //排除 sp-n
+                        {
+                            province1.setsp(province1.getsp() - people);
+                            allpro.setsp(allpro.getsp() - people);
                         }
                     }
-                    System.out.println("读取的内容为：" + str);
                 }
             }
         } catch (IOException  e) {
             e.printStackTrace();
         }
     }
+
+    public static void InformationOut(String out,List<Province> proList,List<String> outinformation) //写出日志信息
+    {
+        out = out.trim();
+        String Path = out.substring(0,out.lastIndexOf("\\"));
+        try {
+            File file = new File(Path);
+            if (!file.exists())
+            {
+                System.out.println("路径错误");
+                System.exit(0);
+            }
+            BufferedWriter wr = new BufferedWriter(new FileWriter(out));
+            for (Province province : proList){
+                if (outinformation.isEmpty())
+                {
+                    wr.write(province.getprovince() + "共有感染患者" + province.getip() + "人 疑似患者" +province.getsp()
+                            + "人 治愈" + province.getcure() + "人 死亡" + province.getdead() + "人\n");
+                }
+                else
+                {
+                    wr.write(province.getprovince() + "共有");
+                    for (String outthing : outinformation)
+                    {
+                        if(outthing.equals("ip"))  wr.write("感染患者" + province.getip() + "人 ");
+                        if(outthing.equals("sp")) wr.write("疑似患者" + province.getsp() + "人 ");
+                        if(outthing.equals("cure")) wr.write("治愈" + province.getcure() + "人 ");
+                        if(outthing.equals("dead")) wr.write("死亡" + province.getdead() + "人 ");
+                    }
+                    wr.write("\n");
+                }
+            }
+            wr.flush();
+            wr.close();
+        }catch (IOException  e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void getAllFileName(String path,ArrayList<String> listFileName) //得到日志名字
     {
         String patterndate = "\\d+-\\d+-\\d+";
@@ -221,10 +257,9 @@ class InfectStatistic {
         String [] names = file.list();
         if(names != null){
             String [] completNames = new String[names.length];
-            for(int i=0;i<names.length;i++){
+            for(int i=0;i < names.length;i++){
                 Matcher Date = date.matcher(names[i]); // 创建 matcher 对象
-                if(Date.find())
-                    completNames[i] = Date.group(0);
+                if(Date.find()) completNames[i] = Date.group(0);
             }
             listFileName.addAll(Arrays.asList(completNames));
         }
@@ -232,26 +267,30 @@ class InfectStatistic {
     public static void main(String[] args)
     {
         String log = null,date = null,out = null;
-        int listjudge = 0;
+        int listjudge1 = 0 ,listjudge2 = 0;
         List<Province> proList = new ArrayList<>();
-        ArrayList<String> listFileName = new ArrayList<String>();
+        ArrayList<String> listFileName = new ArrayList<>();
+        ArrayList<String> outinformation = new ArrayList<String>();
         Province allpro = new Province("全国"); // 创建全国对象
         proList.add(allpro);
-        for(int j = 0;j<args.length;j++) {
-            if(args[j].equals("list")) listjudge++;
+        for(int j = 0;j < args.length;j++) {
+            if(args[j].equals("list")) listjudge1++;
             else if(args[j].equals("-log"))
             {
-                log = args[j +1 ];
-                listjudge++;
+                log = args[j + 1 ];
+                listjudge1++;
             }
             else if(args[j].equals("-out"))
             {
                 out = args[j + 1];
-                listjudge++;
+                listjudge1++;
             }
             else if(args[j].equals("-date")) date = args[j + 1];
+            else if(args[j].equals("-type")) listjudge2 = 1;
+            else if(listjudge2==1&&args[j].equals("ip")||args[j].equals("sp")||args[j].equals("cure")
+                    ||args[j].equals("dead")) outinformation.add(args[j]);
         }
-        if(listjudge!=3)
+        if(listjudge1!=3)
         {
             System.out.println("命令错误");
             System.exit(0);
@@ -274,6 +313,7 @@ class InfectStatistic {
             InformationProcessing(log+name+".log.txt",proList,allpro);
         }
         Collections.sort(proList);
+        InformationOut(out,proList,outinformation);
         for (Province province : proList) {
             province.printmessage();
         }
