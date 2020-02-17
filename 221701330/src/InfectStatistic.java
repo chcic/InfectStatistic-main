@@ -13,16 +13,8 @@ import  java.io.*;
 import  java.lang.*;
 class Province implements Comparable<Province>
 {
-    private String province = null;
+    private String province;
     private int ip = 0,sp = 0,cure = 0,dead = 0;
-    public Province(String province,int ip,int sp,int cure,int dead)
-    {
-        this.province = province;
-        this.ip = ip;
-        this.sp = sp;
-        this.cure = cure;
-        this.dead = dead;
-    }
     public Province(String province)
     {
         this.province = province;
@@ -83,19 +75,10 @@ class Province implements Comparable<Province>
         else if(province2.equals("全国")) return 1;
         return instance.compare(province1,province2);  //按拼音排序
     }
-
-    public void printmessage()
-    {
-        System.out.println("province:"+province+" ip:"+ip+" sp:"+sp+" cure:"+cure+" dead:"+dead);
-    }
 }
 
 class InfectStatistic {
-    public static Boolean wronglist1(String args[])
-    {
-        boolean wrong = false;
-        return wrong;
-    }
+
     public static void addlist(String provence,List<Province> proList) // 判断列表中有没有该省份，无则加入
     {
         boolean inlist = false;
@@ -214,7 +197,7 @@ class InfectStatistic {
     public static void InformationOut(String out,List<Province> proList,List<String> outinformation) //写出日志信息
     {
         out = out.trim();
-        String Path = out.substring(0,out.lastIndexOf("\\"));
+        String Path = out.substring(0,out.lastIndexOf("\\")); //分离得到路径
         try {
             File file = new File(Path);
             if (!file.exists())
@@ -287,10 +270,11 @@ class InfectStatistic {
             }
             else if(args[j].equals("-date")) date = args[j + 1];
             else if(args[j].equals("-type")) listjudge2 = 1;
-            else if(listjudge2==1&&args[j].equals("ip")||args[j].equals("sp")||args[j].equals("cure")
+            else if(args[j].equals("ip")||args[j].equals("sp")||args[j].equals("cure")
                     ||args[j].equals("dead")) outinformation.add(args[j]);
         }
-        if(listjudge1!=3)
+        if(listjudge1!=3||listjudge2!=1)
+        
         {
             System.out.println("命令错误");
             System.exit(0);
@@ -314,8 +298,5 @@ class InfectStatistic {
         }
         Collections.sort(proList);
         InformationOut(out,proList,outinformation);
-        for (Province province : proList) {
-            province.printmessage();
-        }
     }
 }
