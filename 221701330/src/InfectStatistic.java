@@ -225,6 +225,7 @@ class InfectStatistic {
                     wr.write("\n");
                 }
             }
+            wr.write("  // 该文档并非真实数据，仅供测试使用");
             wr.flush();
             wr.close();
         }catch (IOException  e) {
@@ -274,7 +275,7 @@ class InfectStatistic {
                     ||args[j].equals("dead")) outinformation.add(args[j]);
         }
         if(listjudge1!=3||listjudge2!=1)
-        
+
         {
             System.out.println("命令错误");
             System.exit(0);
