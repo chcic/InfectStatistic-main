@@ -178,24 +178,28 @@ class InfectStatistic {
                                     }
                                 }
                             }
-                            else if(Pattern.matches(pattern3,str)) //死亡
+                            else if(Pattern.matches(pattern3,str)) //死亡 dead+n,ip-n
                             {
                                 province1.setdead(province1.getdead() + people);
+                                province1.setip(province1.getip() - people);
                                 allpro.setdead(allpro.getdead() + people);
+                                allpro.setip(allpro.getip() - people);
                             }
-                            else if(Pattern.matches(pattern4,str)) //治愈
+                            else if(Pattern.matches(pattern4,str)) //治愈 cure+n,ip-n
                             {
                                 province1.setcure(province1.getcure() + people);
+                                province1.setip(province1.getip() - people);
                                 allpro.setcure(allpro.getcure() + people);
+                                allpro.setip(allpro.getip() - people);
                             }
-                            else if(Pattern.matches(pattern5,str)) //确诊感染
+                            else if(Pattern.matches(pattern5,str)) //确诊感染 sp-n,ip+n
                             {
                                 province1.setip(province1.getip() + people);
                                 province1.setsp(province1.getsp() - people);
                                 allpro.setip(allpro.getip() + people);
                                 allpro.setsp(allpro.getsp() - people);
                             }
-                            else if(Pattern.matches(pattern6,str)) //排除
+                            else if(Pattern.matches(pattern6,str)) //排除 sp-n
                             {
                                 province1.setsp(province1.getsp() - people);
                                 allpro.setsp(allpro.getsp() - people);
@@ -209,13 +213,18 @@ class InfectStatistic {
             e.printStackTrace();
         }
     }
-    public static void getAllFileName(String path,ArrayList<String> listFileName){
+    public static void getAllFileName(String path,ArrayList<String> listFileName) //得到日志名字
+    {
+        String patterndate = "\\d+-\\d+-\\d+";
+        Pattern date = Pattern.compile(patterndate); // 创建 Pattern 对象
         File file = new File(path);
         String [] names = file.list();
         if(names != null){
             String [] completNames = new String[names.length];
             for(int i=0;i<names.length;i++){
-                completNames[i]=path+names[i];
+                Matcher Date = date.matcher(names[i]); // 创建 matcher 对象
+                if(Date.find())
+                    completNames[i] = Date.group(0);
             }
             listFileName.addAll(Arrays.asList(completNames));
         }
@@ -248,12 +257,21 @@ class InfectStatistic {
             System.exit(0);
         }
         getAllFileName(log,listFileName);
-        for(String name:listFileName){
-            if(name.contains(".txt")||name.contains(".properties")){
-                InformationProcessing(name,proList,allpro);
-                if(date==null) continue;
-                else if(name.equals(log + date + ".log.txt")) break;
+        for(String name:listFileName)
+        {
+            if(date==null)
+            {
+                InformationProcessing(log+name+".log.txt",proList,allpro);
+                continue;
             }
+            else if(listFileName.get(listFileName.size()-1).compareTo(date)<=0) //若输入的日期超出最新的日志范围
+            {
+                System.out.println("输入的日期有错");
+                System.exit(0);
+            }
+            else if (listFileName.get(0).compareTo(date) > 0) break; //若输入日期小于最旧的日志
+            else if(name.compareTo(date) > 0) break;
+            InformationProcessing(log+name+".log.txt",proList,allpro);
         }
         Collections.sort(proList);
         for (Province province : proList) {
