@@ -194,7 +194,7 @@ class InfectStatistic {
         }
     }
 
-    public static void InformationOut(String out,int listjudge2,List<Province> proList,List<String> outinformation,List<String> proinformation) //写出日志信息
+    public static void InformationOut(String out,List<Province> proList,List<String> outinformation) //写出日志信息
     {
         out = out.trim();
         String Path = out.substring(0,out.lastIndexOf("\\")); //分离得到路径
@@ -206,61 +206,27 @@ class InfectStatistic {
                 System.exit(0);
             }
             BufferedWriter wr = new BufferedWriter(new FileWriter(out));
-            if(listjudge2==0&&proinformation.isEmpty())
+            for (Province province : proList)
             {
-                System.out.println("命令错误");
-                System.exit(0);
-            }
-            else if(listjudge2==0)
-            {
-                for (Province province : proList)
+                if (outinformation.isEmpty())
                 {
-                    if (outinformation.isEmpty())
+                    wr.write(province.getprovince() + "共有感染患者" + province.getip() + "人 疑似患者" +province.getsp()
+                            + "人 治愈" + province.getcure() + "人 死亡" + province.getdead() + "人\n");
+                }
+                else
+                {
+                    wr.write(province.getprovince() + "共有");
+                    for (String outthing : outinformation)
                     {
-                        wr.write(province.getprovince() + "共有感染患者" + province.getip() + "人 疑似患者" +province.getsp()
-                                + "人 治愈" + province.getcure() + "人 死亡" + province.getdead() + "人\n");
+                        if(outthing.equals("ip"))  wr.write("感染患者" + province.getip() + "人 ");
+                        if(outthing.equals("sp")) wr.write("疑似患者" + province.getsp() + "人 ");
+                        if(outthing.equals("cure")) wr.write("治愈" + province.getcure() + "人 ");
+                        if(outthing.equals("dead")) wr.write("死亡" + province.getdead() + "人 ");
                     }
-                    else
-                    {
-                        wr.write(province.getprovince() + "共有");
-                        for (String outthing : outinformation)
-                        {
-                            if(outthing.equals("ip"))  wr.write("感染患者" + province.getip() + "人 ");
-                            if(outthing.equals("sp")) wr.write("疑似患者" + province.getsp() + "人 ");
-                            if(outthing.equals("cure")) wr.write("治愈" + province.getcure() + "人 ");
-                            if(outthing.equals("dead")) wr.write("死亡" + province.getdead() + "人 ");
-                        }
-                        wr.write("\n");
-                    }
+                    wr.write("\n");
                 }
             }
-            else
-            {
-                for(Province province : proList)
-                {
-                    for(String pro :proinformation)
-                    {
-                        if (outinformation.isEmpty()&&province.getprovince().equals(pro))
-                        {
-                            wr.write(province.getprovince() + "共有感染患者" + province.getip() + "人 疑似患者" +province.getsp()
-                                    + "人 治愈" + province.getcure() + "人 死亡" + province.getdead() + "人\n");
-                        }
-                        else if(province.getprovince().equals(pro))
-                        {
-                            wr.write(province.getprovince() + "共有");
-                            for (String outthing : outinformation)
-                            {
-                                if(outthing.equals("ip"))  wr.write("感染患者" + province.getip() + "人 ");
-                                if(outthing.equals("sp")) wr.write("疑似患者" + province.getsp() + "人 ");
-                                if(outthing.equals("cure")) wr.write("治愈" + province.getcure() + "人 ");
-                                if(outthing.equals("dead")) wr.write("死亡" + province.getdead() + "人 ");
-                            }
-                            wr.write("\n");
-                        }
-                    }
-                }
-            }
-            wr.write("  // 该文档并非真实数据，仅供测试使用");
+            wr.write("// 该文档并非真实数据，仅供测试使用");
             wr.flush();
             wr.close();
         }catch (IOException  e) {
@@ -283,16 +249,35 @@ class InfectStatistic {
             listFileName.addAll(Arrays.asList(completNames));
         }
     }
+    public static void addtype(String[] args,int j,List<String> outinformation)
+    {
+        for(int i = j + 1;i < args.length;i++)
+        {
+            if(!args[i].contains("-")) outinformation.add(args[i]);
+            else break;
+        }
+    }
+
+    public static void addprovence(String[] args,int j,List<Province> proinformation,List<Province> proList)
+    {
+        for(int i = j + 1;i < args.length;i++)
+        {
+            if(!args[i].contains("-"))
+            {
+                addlist(args[i],proList);
+                addlist(args[i],proinformation);
+            }
+            else break;
+        }
+    }
     public static void main(String[] args)
     {
         String log = null,date = null,out = null;
-        int listjudge1 = 0,listjudge2 = 0;
-        String []Pro ;
-        Pattern p = Pattern.compile("[\u4e00-\u9fa5]+");
+        int listjudge1 = 0,listjudge2 = 0,listjudge3 = 0;
         List<Province> proList = new ArrayList<>();
         ArrayList<String> listFileName = new ArrayList<>();
         ArrayList<String> outinformation = new ArrayList<>();
-        ArrayList<String> proinformation = new ArrayList<>();
+        ArrayList<Province> proinformation = new ArrayList<>();
         Province allpro = new Province("全国"); // 创建全国对象
         proList.add(allpro);
         for(int j = 0;j < args.length;j++) {
@@ -308,17 +293,19 @@ class InfectStatistic {
                 listjudge1++;
             }
             else if(args[j].equals("-date")) date = args[j + 1];
-            else if(args[j].equals("ip")||args[j].equals("sp")||args[j].equals("cure")
-                    ||args[j].equals("dead")) outinformation.add(args[j]);
-            else if(args[j].equals("-provence")) listjudge2 = 1;
-            Matcher m = p.matcher(args[j]);
-            if(m.find())
+            else if(args[j].equals("-type"))
             {
-                addlist(m.group(0),proList);
-                proinformation.add(m.group(0));
+                listjudge3 = 1;
+                addtype(args,j,outinformation);
+            }
+            else if(args[j].equals("-provence"))
+            {
+                listjudge2 = 1;
+                addprovence(args,j,proinformation,proList);
             }
         }
-        if(listjudge1!=3)
+        if(listjudge1!=3||(listjudge2==0&&!proinformation.isEmpty())||(listjudge2==1&&proinformation.isEmpty())
+        ||(listjudge3==0&&!outinformation.isEmpty())||(listjudge3==1&&outinformation.isEmpty()))
         {
             System.out.println("命令错误");
             System.exit(0);
@@ -340,9 +327,22 @@ class InfectStatistic {
             else if(name.compareTo(date) > 0) break;
             InformationProcessing(log+name+".log.txt",proList,allpro);
         }
-        Collections.sort(proList);
         for(Province provence : proList)
-            System.out.println(provence.getprovince());
-        InformationOut(out,listjudge2,proList,outinformation,proinformation);
+        {
+            for(Province pro : proinformation)
+            {
+                if(provence.getprovince().equals(pro.getprovince()))
+                {
+                    pro.setip(provence.getip());
+                    pro.setsp(provence.getsp());
+                    pro.setcure(provence.getcure());
+                    pro.setdead(provence.getdead());
+                }
+            }
+        }
+        Collections.sort(proList);
+        Collections.sort(proinformation);
+        if(listjudge2==1) InformationOut(out,proinformation,outinformation);
+        else InformationOut(out,proList,outinformation);
     }
 }
